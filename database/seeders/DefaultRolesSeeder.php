@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 
 class DefaultRolesSeeder extends ConsoleSeeder
 {
@@ -12,6 +11,19 @@ class DefaultRolesSeeder extends ConsoleSeeder
      */
     public function run(): void
     {
-        //
+        $this->makeDefaultRoles();
+    }
+
+    private function makeDefaultRoles(): array
+    {
+        $owner = Role::create([ 'name' => 'owner' ]);
+        $admin = Role::create([ 'name' => 'admin' ]);
+        $client = Role::create([ 'name' => 'client' ]);
+
+        return [
+            $owner,
+            $admin,
+            $client,
+        ];
     }
 }

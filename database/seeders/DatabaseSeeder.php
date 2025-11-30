@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             LanguageSeeder::class,
             DefaultPermissionsSeeder::class,
             DefaultRolesSeeder::class,
+            AdminUserSeeder::class,
         ]);
     }
 }

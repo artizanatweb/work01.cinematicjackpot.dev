@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\TwoFactorAuthType;
 
 return new class extends Migration
 {
@@ -20,7 +19,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 254);
             $table->boolean('active')->default(false);
-            $table->string('2fa', 100)->default(TwoFactorAuthType::None->value);
             $table->rememberToken();
             $table->timestamps();
         });

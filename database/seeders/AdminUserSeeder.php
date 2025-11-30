@@ -15,7 +15,6 @@ class AdminUserSeeder extends ConsoleSeeder
 {
     public function __construct(
         private readonly UserRepository $repository,
-        private readonly RoleRepository $roleRepository,
         private readonly LanguageRepository $languageRepository,
         ConsoleOutput $output,
     )
@@ -76,22 +75,14 @@ class AdminUserSeeder extends ConsoleSeeder
 
         $this->success("Admin user {$entity->name} created!", false);
 
-        $adminRole = $this->roleRepository->findBySlug('admin');
-        if (!$adminRole) {
-            throw new Exception("Can't find admin role! User {$entity->name} will not be added to database.");
-        }
-        $user->roles()->attach($adminRole);
+        $user->assignRole('admin');
         $this->success("Admin role assigned to user {$entity->name}.", false);
 
         if (!("Silviu" === $user->name)) {
             return;
         }
 
-        $ownerRole = $this->roleRepository->findBySlug('owner');
-        if (!$ownerRole) {
-            return;
-        }
-        $user->roles()->attach($ownerRole);
+        $user->assignRole('owner');
         $this->success("Owner role assigned to user {$entity->name}.", false);
     }
 }
