@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\Authenticate;
 
 /*
  * Add global constants
@@ -17,17 +18,21 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::prefix('admin')
-                ->name('admin')
+            Route::middleware('web')
+                ->prefix('admin')
+                ->name('admin.')
                 ->group(base_path('routes/admin.php'));
 
-            Route::prefix('admin-api')
-                ->name('admin-api')
+            Route::middleware('api')
+                ->prefix('admin-api')
+                ->name('admin-api.')
                 ->group(base_path('routes/admin-api.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'auth' => Authenticate::class
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
