@@ -15,7 +15,7 @@ class Authenticate extends Middleware
 
         // for admin routes --> because in app.php then: routes have name like "something."
         if ($request->routeIs('admin*')) {
-            return route('admin.login');
+            return route('admin.app');
         }
 
         // Normal users fallback
