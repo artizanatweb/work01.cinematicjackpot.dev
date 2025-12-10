@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\AdminUserMiddleware;
 
 /*
  * Add global constants
@@ -31,7 +32,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'auth' => Authenticate::class
+            'auth' => Authenticate::class,
+            'admin.user' => AdminUserMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

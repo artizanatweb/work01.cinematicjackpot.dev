@@ -7,7 +7,7 @@ Route::post('login', [AuthController::class, 'login'])
 //    ->middleware('web')
     ->name('login');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'admin.user'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'user']);
 });
