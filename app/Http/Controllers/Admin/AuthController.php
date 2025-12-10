@@ -2,28 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Entities\AdminCredentialsEntity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LoginRequest;
-use App\Models\User;
+use App\Services\Admin\AuthService;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Http\Request;
+use Exception;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly AuthService $service
+    ) {}
+
     public function login(LoginRequest $request): Response
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        try {
+            $this->service->check2fa($request->post('email'));
+            $credentials = new AdminCredentialsEntity($request->only('email', 'password'));
+            $cookie = $this->service->authenticate($credentials);
+        } catch (Exception $e) {
             return response([
                 'error' => 'Invalid credentials!',
             ], Response::HTTP_UNAUTHORIZED);
         }
-
-        /** @var User $user */
-        $user = Auth::user();
-        $jwt = $user->createToken('token')->plainTextToken;
-        $cookie = cookie('jwt', $jwt, 60 * 24);
 
         return response([
             'message' => "success",
@@ -32,8 +35,7 @@ class AuthController extends Controller
 
     public function logout(): Response
     {
-        $cookie = Cookie::forget('jwt');
-        session()->flush();
+        $cookie = $this->service->deauthenticate();
 
         return response([
             'message' => "success",
@@ -42,7 +44,6 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-//        dd($request->user());
         return $request->user();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LoginRequest extends FormRequest
 {
@@ -37,5 +38,10 @@ class LoginRequest extends FormRequest
                 'min:12'
             ],
         ];
+    }
+
+    public function validationData(): array
+    {
+        return $this->request->all();
     }
 }
