@@ -24,8 +24,15 @@ class AuthService
             throw new Exception('User not found!');
         }
 
-        if (TwoFactorAuthType::None->value === $user?->profile?->two_factor_auth) {
-            return;
+        switch ($user?->profile?->two_factor_auth) {
+            case TwoFactorAuthType::Email:
+                $this->sendOtpEmail();
+                return;
+            case TwoFactorAuthType::Authenticator:
+                $this->requestAuthenticatorOtp();
+                return;
+            default:
+                break;
         }
     }
 
@@ -48,5 +55,15 @@ class AuthService
         session()->flush();
 
         return $cookie;
+    }
+
+    private function sendOtpEmail(): void
+    {
+        // One-time Password
+    }
+
+    private function requestAuthenticatorOtp()
+    {
+        // google Authenticator One-time Password
     }
 }
