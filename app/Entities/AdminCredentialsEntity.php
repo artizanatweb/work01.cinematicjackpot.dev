@@ -27,6 +27,7 @@ class AdminCredentialsEntity
         return [
             'email' => $this->email,
             'password' => $this->password,
+            'active' => 1,
         ];
     }
 }

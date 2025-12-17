@@ -42,6 +42,8 @@ class AuthService
             throw new Exception('Invalid credentials!');
         }
 
+        session()->regenerate();
+
         /** @var User $user */
         $user = Auth::user();
         $jwt = $user->createToken('token')->plainTextToken;
@@ -51,8 +53,12 @@ class AuthService
 
     public function deauthenticate(): Cookie
     {
+        Auth::logout();
+
         $cookie = SessionCookie::forget('jwt');
-        session()->flush();
+
+        session()->invalidate();
+        session()->regenerateToken();
 
         return $cookie;
     }
