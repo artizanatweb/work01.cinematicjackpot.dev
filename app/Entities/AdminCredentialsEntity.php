@@ -30,4 +30,9 @@ class AdminCredentialsEntity
             'active' => 1,
         ];
     }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 }

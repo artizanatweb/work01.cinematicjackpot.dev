@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('phone', 30)->nullable();
             $table->foreignIdFor(Language::class)->nullable();
             $table->string('two_factor_auth', 100)->default(TwoFactorAuthType::None->value);
+            $table->string('otp_code', 6)->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->timestamps();
         });
     }

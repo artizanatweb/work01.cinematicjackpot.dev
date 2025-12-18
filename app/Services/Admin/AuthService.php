@@ -2,14 +2,16 @@
 
 namespace App\Services\Admin;
 
-use App\Entities\AdminCredentialsEntity;
-use App\Enums\TwoFactorAuthType;
-use App\Models\User;
+use App\Exceptions\AdminOtpException;
 use App\Repositories\Interfaces\UserRepository;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Support\Facades\Cookie as SessionCookie;
+use App\Entities\AdminCredentialsEntity;
+use App\Enums\TwoFactorAuthType;
+use App\Models\User;
 
 class AuthService
 {
@@ -17,32 +19,62 @@ class AuthService
         private readonly UserRepository $repository
     ) {}
 
-    public function check2fa(string $email): void
+    private function getUser(AdminCredentialsEntity $credentials, bool $validate = false): User
     {
-        $user = $this->repository->findByEmail($email);
+        $provider = Auth::getProvider();
+
+        /** @var ?User $user */
+        $user = $provider->retrieveByCredentials($credentials->toArray());
         if (!$user) {
-            throw new Exception('User not found!');
+            throw new Exception("User with email {$credentials->getEmail()} not found in database!");
+        }
+        if (!$user->isAdmin()) {
+            throw new Exception("User with email {$user->email} is not ADMIN!");
         }
 
-        switch ($user?->profile?->two_factor_auth) {
-            case TwoFactorAuthType::Email:
-                $this->sendOtpEmail();
-                return;
-            case TwoFactorAuthType::Authenticator:
-                $this->requestAuthenticatorOtp();
-                return;
-            default:
-                break;
+        if (!$validate) {
+            return $user;
+        }
+
+        if (!$provider->validateCredentials($user, $credentials->toArray())) {
+            throw new Exception("Invalid password for user {$user->email}!");
+        }
+
+        return $user;
+    }
+
+    private function sendOtpEmail(User $user): void
+    {
+        dd($user->profile->otp_code);
+    }
+
+    public function verify2FA(AdminCredentialsEntity $credentials): void
+    {
+        $user = $this->getUser($credentials, true);
+
+        if (TwoFactorAuthType::Email === $user?->profile?->two_factor_auth) {
+            // generate 6 digits otp code and add it to profile
+            $this->repository->generateOtp($user);
+            // send OTP code on email
+            $this->sendOtpEmail($user);
+
+            throw new AdminOtpException(TwoFactorAuthType::Email->value);
+        }
+
+        if (TwoFactorAuthType::Authenticator === $user?->profile?->two_factor_auth) {
+            throw new AdminOtpException(TwoFactorAuthType::Authenticator->value);
         }
     }
 
-    public function authenticate(AdminCredentialsEntity $credentials, bool $remember = false): Cookie
+    public function signIn(AdminCredentialsEntity $credentials, bool $remember = false): Cookie
     {
-        if (!Auth::attempt($credentials->toArray())) {
+        if (!Auth::attempt($credentials->toArray(), $remember)) {
             throw new Exception('Invalid credentials!');
         }
 
-        session()->regenerate();
+        /** @var Request $request */
+        $request = request();
+        $request->session()->regenerate();
 
         /** @var User $user */
         $user = Auth::user();
@@ -51,25 +83,28 @@ class AuthService
         return cookie('jwt', $jwt, 60 * 24);
     }
 
-    public function deauthenticate(): Cookie
+    public function signOut(): Cookie
     {
-        Auth::logout();
+        /** @var Request $request */
+        $request = request();
 
+        Auth::logout();
         $cookie = SessionCookie::forget('jwt');
 
-        session()->invalidate();
-        session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return $cookie;
     }
 
-    private function sendOtpEmail(): void
+    public function validateProfileOtp(AdminCredentialsEntity $credentials, $otpCode)
     {
-        // One-time Password
+        $user = $this->getUser($credentials);
+
     }
 
-    private function requestAuthenticatorOtp()
+    public function validateAuthenticatorOtp()
     {
-        // google Authenticator One-time Password
+        //
     }
 }

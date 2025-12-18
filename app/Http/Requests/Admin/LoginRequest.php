@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\TwoFactorAuthType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,6 +37,20 @@ class LoginRequest extends FormRequest
                 'required',
                 'max:100',
                 'min:12'
+            ],
+            'remember' => [
+                'sometimes',
+                'boolean'
+            ],
+            'otp_code' => [
+                'sometimes',
+                'required',
+                'digits:6'
+            ],
+            'tfa_type' => [
+                'sometimes',
+                'required',
+                Rule::in(TwoFactorAuthType::Email->value,TwoFactorAuthType::Authenticator->value),
             ],
         ];
     }

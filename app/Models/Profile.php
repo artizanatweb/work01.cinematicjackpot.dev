@@ -10,6 +10,7 @@ class Profile extends Model
 {
     protected $casts = [
         'two_factor_auth' => TwoFactorAuthType::class,
+        'otp_expires_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

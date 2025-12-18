@@ -9,6 +9,7 @@ use App\Services\Admin\AuthService;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Exception;
+use App\Exceptions\AdminOtpException;
 
 class AuthController extends Controller
 {
@@ -18,11 +19,16 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): Response
     {
+        $data = $request->validated();
         try {
-            $this->service->check2fa($request->post('email'));
-            $credentials = new AdminCredentialsEntity($request->only('email', 'password'));
-            $cookie = $this->service->authenticate($credentials);
+            $credentials = new AdminCredentialsEntity($data);
+            $this->service->verify2FA($credentials);
+            $cookie = $this->service->signIn($credentials);
+        } catch (AdminOtpException $otpe) {
+            dd($otpe->getType());
         } catch (Exception $e) {
+            // log $e->getMessage()
+
             return response([
                 'error' => 'Invalid credentials!',
             ], Response::HTTP_UNAUTHORIZED);
@@ -40,6 +46,12 @@ class AuthController extends Controller
         return response([
             'message' => "success",
         ])->withCookie($cookie);
+    }
+
+    public function otpLogin(LoginRequest $request)
+    {
+        $data = $request->validated();
+
     }
 
     public function otpEmail()

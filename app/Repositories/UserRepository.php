@@ -66,4 +66,28 @@ class UserRepository implements Interfaces\UserRepository
 //        return $role->users()->update(['has_email_authentication' => $active]);
         return 1;
     }
+
+    public function generateOtp(User $user): void
+    {
+
+        $code32 = [];
+        for ($c = 0; $c < 32; $c++) {
+            $digit = rand(0,9);
+            $code32[] = $digit;
+        }
+
+        $otpArray = [];
+        for ($i = 0; $i < 6; $i++) {
+            $p = rand(0,31);
+            $otpArray[] = $code32[$p];
+        }
+
+        $otp = implode($otpArray);
+        $otpAvailability = (int) env('OTP_AVAILABILITY_MINUTES', 5);
+
+        $profile = $user->profile;
+        $profile->otp_code = $otp;
+        $profile->otp_expires_at = now()->addMinutes($otpAvailability);
+        $user->profile()->save($profile);
+    }
 }

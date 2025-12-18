@@ -14,4 +14,6 @@ interface UserRepository
     public function updateAdmin(User $user, AdminUserEntity $entity): void;
 
     public function setAdmins2FA(bool $active = true): int;
+
+    public function generateOtp(User $user): void;
 }
