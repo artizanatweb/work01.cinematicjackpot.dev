@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Exceptions\AdminOtpException;
+use App\Mail\AdminOtpEmail;
 use App\Repositories\Interfaces\UserRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Cookie as SessionCookie;
 use App\Entities\AdminCredentialsEntity;
 use App\Enums\TwoFactorAuthType;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class AuthService
 {
@@ -45,7 +47,8 @@ class AuthService
 
     private function sendOtpEmail(User $user): void
     {
-        dd($user->profile->otp_code);
+//        dd($user->profile->otp_code);
+        Mail::to($user)->send(new AdminOtpEmail($user));
     }
 
     public function verify2FA(AdminCredentialsEntity $credentials): void
