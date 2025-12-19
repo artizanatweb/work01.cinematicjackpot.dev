@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\AdminUserMiddleware;
+use App\Http\Middleware\AdminLocaleMiddleware;
 
 /*
  * Add global constants
@@ -19,12 +20,12 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::middleware('web')
+            Route::middleware(['web', 'admin.locale'])
                 ->prefix('admin')
                 ->name('admin.')
                 ->group(base_path('routes/admin.php'));
 
-            Route::middleware(['api'])
+            Route::middleware(['api', 'admin.locale'])
                 ->prefix('admin-api')
                 ->name('admin-api.')
                 ->group(base_path('routes/admin-api.php'));
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => Authenticate::class,
             'admin.user' => AdminUserMiddleware::class,
+            'admin.locale' => AdminLocaleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

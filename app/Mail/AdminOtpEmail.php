@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -19,7 +20,8 @@ class AdminOtpEmail extends Mailable
      */
     public function __construct(private readonly User $user)
     {
-        //
+        $locale = get_user_locale($this->user);
+        app()->setLocale($locale);
     }
 
     /**
@@ -27,8 +29,10 @@ class AdminOtpEmail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $strDate = Carbon::now()->format('d/m/Y H:i');
+
         return new Envelope(
-            subject: 'Admin Otp Email',
+            subject: __("CinematicJackpot admin authentication") . ' -- ' . $strDate,
         );
     }
 
@@ -37,16 +41,11 @@ class AdminOtpEmail extends Mailable
      */
     public function content(): Content
     {
-        $code = [];
-        if ($this->user?->profile?->otp_code) {
-            $code = str_split($this->user?->profile?->otp_code);
-        }
-
         return new Content(
-            view: 'admin.otp-email',
+            view: 'admin.email.otp',
             with: [
                 'user' => $this->user,
-                'code' => $code,
+                'code' => $this->user?->profile?->otp_code,
             ]
         );
     }

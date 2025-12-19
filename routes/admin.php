@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return '<p>This is the ADMIN App route!</p>';
+    return view('admin.test');
 })->name('app');
 
 //Route::get('/login', function () {

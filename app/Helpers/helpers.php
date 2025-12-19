@@ -2,6 +2,7 @@
 use App\Entities\AdminUserEntity;
 use Filament\Facades\Filament;
 use Illuminate\Support\HtmlString;
+use App\Models\User;
 
 if (!function_exists('get_env_admins')) {
     function get_env_admins(): array
@@ -83,5 +84,12 @@ if (!function_exists('get_language_flag')) {
         }
 
         return null;
+    }
+}
+
+if (!function_exists('get_user_locale')) {
+    function get_user_locale(User $user): string
+    {
+        return $user?->profile?->language?->code ?? 'en';
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Exception;
 use App\Exceptions\AdminOtpException;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -25,9 +26,10 @@ class AuthController extends Controller
             $this->service->verify2FA($credentials);
             $cookie = $this->service->signIn($credentials);
         } catch (AdminOtpException $otpe) {
+            // return OTP screen for type:
             dd($otpe->getType());
         } catch (Exception $e) {
-            // log $e->getMessage()
+            Log::error($e->getMessage());
 
             return response([
                 'error' => 'Invalid credentials!',
