@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Entities\AdminCredentialsEntity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LoginRequest;
+use App\Http\Resources\ErrorResource;
 use App\Services\Admin\AuthService;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Exception;
@@ -18,7 +20,7 @@ class AuthController extends Controller
         private readonly AuthService $service
     ) {}
 
-    public function login(LoginRequest $request): Response
+    public function login(LoginRequest $request): Response | JsonResource
     {
         $data = $request->validated();
         try {
@@ -31,9 +33,11 @@ class AuthController extends Controller
         } catch (Exception $e) {
             Log::error($e->getMessage());
 
-            return response([
-                'error' => 'Invalid credentials!',
-            ], Response::HTTP_UNAUTHORIZED);
+//            return response([
+//                'error' => 'Invalid credentials!',
+//            ], Response::HTTP_UNAUTHORIZED);
+
+            return new ErrorResource('Invalid credentials!', Response::HTTP_UNAUTHORIZED);
         }
 
         return response([
@@ -43,7 +47,7 @@ class AuthController extends Controller
 
     public function logout(): Response
     {
-        $cookie = $this->service->deauthenticate();
+        $cookie = $this->service->signOut();
 
         return response([
             'message' => "success",
